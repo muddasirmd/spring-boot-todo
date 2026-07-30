@@ -1,0 +1,11 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: banking-system
+
+  datasource:
+    url: jdbc:postgresql://10.10.1.87:5436/CAMS_DB_DESIGN
+    username: postgres
+    password: postgres890
