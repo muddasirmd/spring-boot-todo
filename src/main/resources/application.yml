@@ -6,6 +6,16 @@ spring:
     name: banking-system
 
   datasource:
-    url: jdbc:postgresql://10.10.1.87:5436/CAMS_DB_DESIGN
-    username: postgres
-    password: postgres890
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres1
+    password: postgres1
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+    show-sql: true
+
+    properties:
+      hibernate:
+        format_sql: true

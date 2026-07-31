@@ -7,16 +7,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import org.apache.catalina.connector.Response;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.teresol.demo.dto.CustomerDTO;
+import com.teresol.demo.entity.Customer;
+import com.teresol.demo.repository.CustomerRepository;
 
 @Service
 public class CustomerService {
+
+    private final CustomerRepository customerRepository;
+
+    public CustomerService(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+    }
+
     
     public List<CustomerDTO> getDummyCustomers() {
         return Arrays.asList(
@@ -48,22 +57,24 @@ public class CustomerService {
 
     public ResponseEntity<Map<String, Object>> findById(Long id){
 
-        List<CustomerDTO> customers = new ArrayList<>(getDummyCustomers());
+        // List<CustomerDTO> customers = new ArrayList<>(getDummyCustomers());
 
-        Optional<CustomerDTO> customer = customers.stream().
-            filter(c -> c.getId().equals(id)).
-            findFirst();
+        // Optional<CustomerDTO> customer = customers.stream().
+        //     filter(c -> c.getId().equals(id)).
+        //     findFirst();
+        
+        Customer customer = customerRepository.findById(id).orElse(null);
 
         Map<String, Object> response = new HashMap<>();
 
-        if(customer.isPresent()){
+        if(customer != null){
             response.put("message", "Customer found");
-            response.put("data", customer.get());
+            response.put("data", customer);
             return ResponseEntity.ok(response);
         }
         else{
             response.put("message", "Customer not found with ID: " + id);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         
     }
