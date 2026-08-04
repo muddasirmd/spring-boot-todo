@@ -1,0 +1,33 @@
+package com.teresol.demo.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Table(name = "customers")
+@Getter
+@Setter
+public class Customer {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long customerId;
+
+    @Column(nullable = false)
+    private Long organizationId;
+
+    @Column(unique = true)
+    // @Column(columnDefinition = "jsonb")
+    private String email;    
+    
+    // @Column(columnDefinition = "jsonb")
+    private Integer age;
+
+
+}
