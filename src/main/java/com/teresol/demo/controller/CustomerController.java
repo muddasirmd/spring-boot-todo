@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.teresol.demo.dto.CustomerDTO;
 import com.teresol.demo.service.CustomerService;
+import com.teresol.demo.util.ApiResponse;
 
 import jakarta.validation.Valid;
 
@@ -41,7 +42,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> getCustomersByID(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<CustomerDTO>> getCustomersByID(@PathVariable Long id) {
 
         return customerService.findById(id);
     }

@@ -14,8 +14,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.teresol.demo.dto.CustomerDTO;
+import com.teresol.demo.dto.LoanDTO;
 import com.teresol.demo.entity.Customer;
+import com.teresol.demo.entity.Loan;
 import com.teresol.demo.repository.CustomerRepository;
+import com.teresol.demo.util.ApiResponse;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class CustomerService {
@@ -31,50 +36,54 @@ public class CustomerService {
         return Arrays.asList(
             CustomerDTO.builder()
                 .id(1L)
-                .firstName("Alice")
-                .lastName("Smith")
+                .name("Alice")
+                .age(20)
                 .email("alice.smith@example.com")
                 .dateOfBirth(LocalDate.of(1990, 5, 14))
                 .build(),
 
             CustomerDTO.builder()
                 .id(2L)
-                .firstName("Bob")
-                .lastName("Johnson")
+                .name("Bob")
+                .age(25)
                 .email("bob.johnson@example.com")
                 .dateOfBirth(LocalDate.of(1985, 11, 22))
                 .build(),
 
             CustomerDTO.builder()
                 .id(3L)
-                .firstName("Charlie")
-                .lastName("Brown")
+                .name("Charlie")
+                .age(29)
                 .email("charlie.brown@example.com")
                 .dateOfBirth(LocalDate.of(1998, 3, 30))
                 .build()
         );
     }
 
-    public ResponseEntity<Map<String, Object>> findById(Long id){
+    public ResponseEntity<ApiResponse<CustomerDTO>> findById(Long id){
 
-        // List<CustomerDTO> customers = new ArrayList<>(getDummyCustomers());
 
-        // Optional<CustomerDTO> customer = customers.stream().
-        //     filter(c -> c.getId().equals(id)).
-        //     findFirst();
-        
         Customer customer = customerRepository.findById(id).orElse(null);
-
-        Map<String, Object> response = new HashMap<>();
+        // Customer customer = customerRepository.getReferenceById(id);
 
         if(customer != null){
-            response.put("message", "Customer found");
-            response.put("data", customer);
-            return ResponseEntity.ok(response);
+            List<LoanDTO> loanResponses = customer.getLoans()
+                .stream()
+                .map(this::mapLoan)
+                .toList();
+                
+            CustomerDTO customerDTO = CustomerDTO.builder()
+                .id(customer.getCustomerId())
+                .name(customer.getName())
+                .email(customer.getEmail())
+                .age(customer.getAge())
+                .loans(loanResponses)
+                .build();
+            
+            return ResponseEntity.ok(ApiResponse.success(customerDTO, "Customer found"));
         }
         else{
-            response.put("message", "Customer not found with ID: " + id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Customer not found with ID: " + id));
         }
         
     }
@@ -88,25 +97,16 @@ public class CustomerService {
         return ResponseEntity.ok(customers);
     }
 
+    @Transactional
     public ResponseEntity<String> updateCustomer(Long id, CustomerDTO requestDTO) {
 
-        List<CustomerDTO> customers = new ArrayList<>(getDummyCustomers());
-
-        Optional<CustomerDTO> existingCustomerOpt = customers.stream()
-            .filter(c -> c.getId().equals(id))
-            .findFirst();
-
-        if (existingCustomerOpt.isPresent()) {
-            CustomerDTO existingCustomer = existingCustomerOpt.get();
-            existingCustomer.setFirstName(requestDTO.getFirstName());
-            existingCustomer.setLastName(requestDTO.getLastName());
-            existingCustomer.setEmail(requestDTO.getEmail());
-            existingCustomer.setDateOfBirth(requestDTO.getDateOfBirth());
+        Customer customer = customerRepository.findById(id).orElseThrow();
+        customer.setName(requestDTO.getName());
 
             return ResponseEntity.ok("Customer with ID: " + id + " updated successfully");
-        } else {
-            return ResponseEntity.status(404).body("Customer not found with ID: " + id);
-        }   
+        // } else {
+        //     return ResponseEntity.status(404).body("Customer not found with ID: " + id);
+        // }   
     }
 
     
@@ -128,5 +128,16 @@ public class CustomerService {
         response.put("data", customers);
 
         return ResponseEntity.ok(response);
+    }
+
+    private LoanDTO mapLoan(Loan loan) {
+
+        LoanDTO dto = new LoanDTO();
+
+        dto.setId(loan.getLoanId());
+        dto.setAmount(loan.getAmount());
+        dto.setInterestRate(loan.getInterestRate());
+
+        return dto;
     }
 }
