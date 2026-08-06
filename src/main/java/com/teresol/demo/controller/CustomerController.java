@@ -37,7 +37,8 @@ public class CustomerController {
     @GetMapping
     public ResponseEntity<List<CustomerDTO>> customers() {
 
-        List<CustomerDTO> customers = customerService.getDummyCustomers();
+        List<CustomerDTO> customers = customerService.getAllCustomers();
+        
         return ResponseEntity.ok(customers);
     }
 
