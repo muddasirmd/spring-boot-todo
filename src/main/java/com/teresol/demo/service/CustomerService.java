@@ -60,11 +60,33 @@ public class CustomerService {
         );
     }
 
+    public List<CustomerDTO> getAllCustomers() {
+
+        // List<Customer> customers = customerRepository.findAll();
+        // List<Customer> customers = customerRepository.findByAgeLessThan(20);
+        
+        List<Customer> customers = customerRepository.findAdults(20);
+        
+        List<CustomerDTO> customerDTOs = customers.stream()
+            .map(customer -> CustomerDTO.builder()
+                .id(customer.getCustomerId())
+                .name(customer.getName())
+                .email(customer.getEmail())
+                .age(customer.getAge())
+                .build())
+            .toList();
+
+        return customerDTOs;
+    }
+
     public ResponseEntity<ApiResponse<CustomerDTO>> findById(Long id){
 
 
         Customer customer = customerRepository.findById(id).orElse(null);
         // Customer customer = customerRepository.getReferenceById(id);
+
+        // Customer customer = customerRepository.findByEmail(email).orElse(null);
+        
 
         if(customer != null){
             List<LoanDTO> loanResponses = customer.getLoans()
