@@ -12,13 +12,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.teresol.demo.dto.CustomerDTO;
+import com.teresol.demo.dto.CustomerSummary;
 import com.teresol.demo.service.CustomerService;
 import com.teresol.demo.util.ApiResponse;
 
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 
 
 @RestController
@@ -34,10 +37,18 @@ public class CustomerController {
     }
 
 
-    @GetMapping
-    public ResponseEntity<List<CustomerDTO>> customers() {
+    @GetMapping("/summary")
+    public ResponseEntity<List<CustomerSummary>> customersSummary() {
 
-        List<CustomerDTO> customers = customerService.getAllCustomers();
+        List<CustomerSummary> customers = customerService.getAllCustomersSummary();
+        
+        return ResponseEntity.ok(customers);
+    }    
+    
+    @GetMapping
+    public ResponseEntity<List<CustomerDTO>> customers(@RequestParam int page, @RequestParam int size, @RequestParam String sortBy) {
+
+        List<CustomerDTO> customers = customerService.getAllCustomers(page, size, sortBy);
         
         return ResponseEntity.ok(customers);
     }

@@ -8,12 +8,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.teresol.demo.dto.CustomerDTO;
+import com.teresol.demo.dto.CustomerSummary;
 import com.teresol.demo.dto.LoanDTO;
 import com.teresol.demo.entity.Customer;
 import com.teresol.demo.entity.Loan;
@@ -60,12 +65,21 @@ public class CustomerService {
         );
     }
 
-    public List<CustomerDTO> getAllCustomers() {
+    public List<CustomerSummary> getAllCustomersSummary() {
+
+        List<CustomerSummary> customers = customerRepository.findSummary();
+
+        return customers;
+    }    
+    
+    public List<CustomerDTO> getAllCustomers(int page, int size, String sortBy) {
 
         // List<Customer> customers = customerRepository.findAll();
         // List<Customer> customers = customerRepository.findByAgeLessThan(20);
         
-        List<Customer> customers = customerRepository.findAdults(20);
+        // List<Customer> customers = customerRepository.findAdults(20);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        Page<Customer> customers = customerRepository.findAll(pageable);
         
         List<CustomerDTO> customerDTOs = customers.stream()
             .map(customer -> CustomerDTO.builder()
