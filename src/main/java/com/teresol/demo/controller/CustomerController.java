@@ -56,7 +56,7 @@ public class CustomerController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<CustomerDTO>> getCustomersByID(@PathVariable Long id) {
 
-        return customerService.findById(id);
+        return customerService.findCustomerById(id);
     }
 
     @PostMapping("")

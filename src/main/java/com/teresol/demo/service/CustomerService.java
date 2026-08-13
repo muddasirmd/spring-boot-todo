@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.teresol.demo.dto.CustomerDTO;
 import com.teresol.demo.dto.CustomerSummary;
@@ -25,7 +26,6 @@ import com.teresol.demo.entity.Loan;
 import com.teresol.demo.repository.CustomerRepository;
 import com.teresol.demo.util.ApiResponse;
 
-import jakarta.transaction.Transactional;
 
 @Service
 public class CustomerService {
@@ -93,7 +93,8 @@ public class CustomerService {
         return customerDTOs;
     }
 
-    public ResponseEntity<ApiResponse<CustomerDTO>> findById(Long id){
+    @Transactional(readOnly = true)
+    public ResponseEntity<ApiResponse<CustomerDTO>> findCustomerById(Long id){
 
 
         Customer customer = customerRepository.findById(id).orElse(null);
@@ -136,7 +137,7 @@ public class CustomerService {
     @Transactional
     public ResponseEntity<String> updateCustomer(Long id, CustomerDTO requestDTO) {
 
-        Customer customer = customerRepository.findById(id).orElseThrow();
+        Customer customer = customerRepository.findForUpdate(id).orElseThrow();
         customer.setName(requestDTO.getName());
 
             return ResponseEntity.ok("Customer with ID: " + id + " updated successfully");

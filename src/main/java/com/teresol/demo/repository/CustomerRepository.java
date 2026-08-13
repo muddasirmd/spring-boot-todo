@@ -1,16 +1,18 @@
 package com.teresol.demo.repository;
 
 import java.util.List;
+import java.util.Optional;
 
-import org.springframework.boot.data.autoconfigure.web.DataWebProperties.Pageable;
-import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.teresol.demo.dto.CustomerSummary;
 import com.teresol.demo.entity.Customer;
+
+import jakarta.persistence.LockModeType;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
@@ -37,6 +39,13 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             """)
     List<CustomerSummary> findSummary();
 
-    // Page<Customer> findAll(Pageable pageable);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            SELECT c
+            FROM Customer c
+            WHERE c.id = :id
+            """)
+    Optional<Customer> findForUpdate(@Param("id") Long id);
 
 }
