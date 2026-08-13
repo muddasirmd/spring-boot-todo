@@ -17,7 +17,7 @@ import lombok.Setter;
 @Table(name = "loans")
 @Getter
 @Setter
-public class Loan {
+public class Loan extends AuditableEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

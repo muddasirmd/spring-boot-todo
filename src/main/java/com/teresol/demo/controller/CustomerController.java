@@ -60,7 +60,7 @@ public class CustomerController {
     }
 
     @PostMapping("")
-    public ResponseEntity<List<CustomerDTO>> createCustomer(@Valid @RequestBody CustomerDTO requestDTO) {
+    public ResponseEntity<String> createCustomer(@Valid @RequestBody CustomerDTO requestDTO) {
 
         return customerService.createCustomer(requestDTO);
     

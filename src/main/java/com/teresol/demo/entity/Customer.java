@@ -19,14 +19,11 @@ import lombok.Setter;
 @Table(name = "customers")
 @Getter
 @Setter
-public class Customer {
+public class Customer extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long customerId;
-
-    @Column(nullable = false)
-    private Long organizationId;
 
     @Column(unique = true)
     private String name;      

@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -75,11 +74,12 @@ public class CustomerService {
     public List<CustomerDTO> getAllCustomers(int page, int size, String sortBy) {
 
         // List<Customer> customers = customerRepository.findAll();
-        // List<Customer> customers = customerRepository.findByAgeLessThan(20);
-        
+        List<Customer> customers = customerRepository.findByAgeLessThan(30);        
         // List<Customer> customers = customerRepository.findAdults(20);
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
-        Page<Customer> customers = customerRepository.findAll(pageable);
+
+        // Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        // Page<Customer> customers = customerRepository.findAll(pageable);
+        
         
         List<CustomerDTO> customerDTOs = customers.stream()
             .map(customer -> CustomerDTO.builder()
@@ -87,6 +87,7 @@ public class CustomerService {
                 .name(customer.getName())
                 .email(customer.getEmail())
                 .age(customer.getAge())
+                .loans(toList(customer))
                 .build())
             .toList();
 
@@ -104,17 +105,13 @@ public class CustomerService {
         
 
         if(customer != null){
-            List<LoanDTO> loanResponses = customer.getLoans()
-                .stream()
-                .map(this::mapLoan)
-                .toList();
                 
             CustomerDTO customerDTO = CustomerDTO.builder()
                 .id(customer.getCustomerId())
                 .name(customer.getName())
                 .email(customer.getEmail())
                 .age(customer.getAge())
-                .loans(loanResponses)
+                .loans(toList(customer))
                 .build();
             
             return ResponseEntity.ok(ApiResponse.success(customerDTO, "Customer found"));
@@ -126,12 +123,23 @@ public class CustomerService {
     }
 
 
-    public ResponseEntity<List<CustomerDTO>> createCustomer(CustomerDTO requestDTO) {
+    public ResponseEntity<String> createCustomer(CustomerDTO requestDTO) {
         
-        List<CustomerDTO> customers = new ArrayList<>(getDummyCustomers());
-        customers.add(requestDTO);
+        // List<CustomerDTO> customers = new ArrayList<>(getDummyCustomers());
+        // customers.add(requestDTO);
 
-        return ResponseEntity.ok(customers);
+        // return ResponseEntity.ok(customers);
+
+        // 1. Convert DTO to Entity
+        Customer customer = new Customer();
+        customer.setName(requestDTO.getName());
+        customer.setAge(requestDTO.getAge());
+        customer.setEmail(requestDTO.getEmail());
+
+        customerRepository.save(customer);
+       
+        return ResponseEntity.ok("Customer saved successfully");
+        
     }
 
     @Transactional
@@ -177,4 +185,15 @@ public class CustomerService {
 
         return dto;
     }
+
+    public List<LoanDTO> toList(Customer customer){
+
+        List<LoanDTO> loanResponses = customer.getLoans()
+        .stream()
+        .map(this::mapLoan)
+        .toList();
+
+        return loanResponses;
+    }
+
 }
