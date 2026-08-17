@@ -1,4 +1,4 @@
-package com.teresol.demo.exception.business;
+package com.teresol.demo.exception;
 
 public class CustomerNotFoundException extends RuntimeException {
 
