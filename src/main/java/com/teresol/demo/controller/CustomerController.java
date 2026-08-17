@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,19 +39,22 @@ public class CustomerController {
 
 
     @GetMapping("/summary")
-    public ResponseEntity<List<CustomerSummary>> customersSummary() {
+    public List<CustomerSummary> customersSummary() {
 
         List<CustomerSummary> customers = customerService.getAllCustomersSummary();
         
-        return ResponseEntity.ok(customers);
+        return customers;
     }    
     
     @GetMapping
-    public ResponseEntity<List<CustomerDTO>> customers(@RequestParam int page, @RequestParam int size, @RequestParam String sortBy) {
+    public Page<CustomerDTO> getCustomers(
+        @RequestParam(defaultValue = "0") int page, 
+        @RequestParam(defaultValue = "10") int size, 
+        @RequestParam String sortBy) {
 
-        List<CustomerDTO> customers = customerService.getAllCustomers(page, size, sortBy);
+        Page<CustomerDTO> customers = customerService.getAllCustomers(page, size, sortBy);
         
-        return ResponseEntity.ok(customers);
+        return customers;
     }
 
     @GetMapping("/{id}")
@@ -60,14 +64,14 @@ public class CustomerController {
     }
 
     @PostMapping("")
-    public ResponseEntity<String> createCustomer(@Valid @RequestBody CustomerDTO requestDTO) {
+    public String createCustomer(@Valid @RequestBody CustomerDTO requestDTO) {
 
         return customerService.createCustomer(requestDTO);
     
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCustomer(@PathVariable Long id, 
+    public String updateCustomer(@PathVariable Long id, 
             @Valid @RequestBody CustomerDTO requestDTO) {
 
         return customerService.updateCustomer(id, requestDTO);

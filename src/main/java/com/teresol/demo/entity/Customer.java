@@ -25,10 +25,10 @@ public class Customer extends AuditableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long customerId;
 
-    @Column(unique = true)
+    @Column(nullable = true)
     private String name;      
     
-    @Column(unique = true)
+    @Column(unique = true, nullable = true)
     private String email;    
     
     // @Column(columnDefinition = "jsonb")
