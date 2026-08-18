@@ -1,6 +1,5 @@
 package com.teresol.demo.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -16,13 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.teresol.demo.dto.CustomerDTO;
-import com.teresol.demo.dto.CustomerSummary;
+import com.teresol.demo.dto.request.CustomerRequest;
+import com.teresol.demo.dto.response.CustomerSummary;
 import com.teresol.demo.service.CustomerService;
 import com.teresol.demo.util.ApiResponse;
 
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 
 
 @RestController
@@ -47,24 +45,24 @@ public class CustomerController {
     }    
     
     @GetMapping
-    public Page<CustomerDTO> getCustomers(
+    public Page<CustomerRequest> getCustomers(
         @RequestParam(defaultValue = "0") int page, 
         @RequestParam(defaultValue = "10") int size, 
         @RequestParam String sortBy) {
 
-        Page<CustomerDTO> customers = customerService.getAllCustomers(page, size, sortBy);
+        Page<CustomerRequest> customers = customerService.getAllCustomers(page, size, sortBy);
         
         return customers;
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<CustomerDTO>> getCustomersByID(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<CustomerRequest>> getCustomersByID(@PathVariable Long id) {
 
         return customerService.findCustomerById(id);
     }
 
     @PostMapping("")
-    public String createCustomer(@Valid @RequestBody CustomerDTO requestDTO) {
+    public String createCustomer(@Valid @RequestBody CustomerRequest requestDTO) {
 
         return customerService.createCustomer(requestDTO);
     
@@ -72,7 +70,7 @@ public class CustomerController {
 
     @PutMapping("/{id}")
     public String updateCustomer(@PathVariable Long id, 
-            @Valid @RequestBody CustomerDTO requestDTO) {
+            @Valid @RequestBody CustomerRequest requestDTO) {
 
         return customerService.updateCustomer(id, requestDTO);
     }
