@@ -12,16 +12,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.teresol.demo.dto.CustomerDTO;
-import com.teresol.demo.dto.CustomerSummary;
-import com.teresol.demo.dto.LoanDTO;
+import com.teresol.demo.dto.request.CustomerRequest;
+import com.teresol.demo.dto.request.LoanRequest;
+import com.teresol.demo.dto.response.CustomerSummary;
 import com.teresol.demo.entity.Customer;
 import com.teresol.demo.entity.Loan;
+import com.teresol.demo.exception.DuplicateEmailException;
+import com.teresol.demo.mapper.CustomerMapper;
 import com.teresol.demo.repository.CustomerRepository;
 import com.teresol.demo.util.ApiResponse;
 
@@ -30,15 +31,17 @@ import com.teresol.demo.util.ApiResponse;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final CustomerMapper customerMapper;
 
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, CustomerMapper customerMapper) {
         this.customerRepository = customerRepository;
+        this.customerMapper = customerMapper;
     }
 
     
-    public List<CustomerDTO> getDummyCustomers() {
+    public List<CustomerRequest> getDummyCustomers() {
         return Arrays.asList(
-            CustomerDTO.builder()
+            CustomerRequest.builder()
                 .id(1L)
                 .name("Alice")
                 .age(20)
@@ -46,7 +49,7 @@ public class CustomerService {
                 .dateOfBirth(LocalDate.of(1990, 5, 14))
                 .build(),
 
-            CustomerDTO.builder()
+            CustomerRequest.builder()
                 .id(2L)
                 .name("Bob")
                 .age(25)
@@ -54,7 +57,7 @@ public class CustomerService {
                 .dateOfBirth(LocalDate.of(1985, 11, 22))
                 .build(),
 
-            CustomerDTO.builder()
+            CustomerRequest.builder()
                 .id(3L)
                 .name("Charlie")
                 .age(29)
@@ -71,42 +74,43 @@ public class CustomerService {
         return customers;
     }    
     
-    public List<CustomerDTO> getAllCustomers(int page, int size, String sortBy) {
+    public Page<CustomerRequest> getAllCustomers(int page, int size, String sortBy) {
 
         // List<Customer> customers = customerRepository.findAll();
-        List<Customer> customers = customerRepository.findByAgeLessThan(30);        
+        // List<Customer> customers = customerRepository.findByAgeLessThan(30);        
         // List<Customer> customers = customerRepository.findAdults(20);
 
-        // Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+
         // Page<Customer> customers = customerRepository.findAll(pageable);
         
-        
-        List<CustomerDTO> customerDTOs = customers.stream()
-            .map(customer -> CustomerDTO.builder()
-                .id(customer.getCustomerId())
-                .name(customer.getName())
-                .email(customer.getEmail())
-                .age(customer.getAge())
-                .loans(toList(customer))
-                .build())
-            .toList();
+        // List<CustomerDTO> customerDTOs = customers.stream()
+        //     .map(customer -> CustomerDTO.builder()
+        //         .id(customer.getCustomerId())
+        //         .name(customer.getName())
+        //         .email(customer.getEmail())
+        //         .age(customer.getAge())
+        //         .loans(toList(customer))
+        //         .build())
+        //     .toList();
 
-        return customerDTOs;
+        return customerRepository.findAll(pageable).map(customerMapper::toResponse);
+
+        // return customerDTOs;
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<ApiResponse<CustomerDTO>> findCustomerById(Long id){
+    public ResponseEntity<ApiResponse<CustomerRequest>> findCustomerById(Long id){
 
 
         Customer customer = customerRepository.findById(id).orElse(null);
         // Customer customer = customerRepository.getReferenceById(id);
 
         // Customer customer = customerRepository.findByEmail(email).orElse(null);
-        
 
         if(customer != null){
                 
-            CustomerDTO customerDTO = CustomerDTO.builder()
+            CustomerRequest customerDTO = CustomerRequest.builder()
                 .id(customer.getCustomerId())
                 .name(customer.getName())
                 .email(customer.getEmail())
@@ -123,12 +127,18 @@ public class CustomerService {
     }
 
 
-    public ResponseEntity<String> createCustomer(CustomerDTO requestDTO) {
+    @Transactional
+    public String createCustomer(CustomerRequest requestDTO) {
         
         // List<CustomerDTO> customers = new ArrayList<>(getDummyCustomers());
         // customers.add(requestDTO);
 
         // return ResponseEntity.ok(customers);
+
+         if (customerRepository.existsByEmail(requestDTO.getEmail())) {
+
+            throw new DuplicateEmailException(requestDTO.getEmail());
+        }
 
         // 1. Convert DTO to Entity
         Customer customer = new Customer();
@@ -136,19 +146,19 @@ public class CustomerService {
         customer.setAge(requestDTO.getAge());
         customer.setEmail(requestDTO.getEmail());
 
-        customerRepository.save(customer);
+        customer = customerRepository.save(customer);
        
-        return ResponseEntity.ok("Customer saved successfully");
+        return "Customer saved successfully";
         
     }
 
     @Transactional
-    public ResponseEntity<String> updateCustomer(Long id, CustomerDTO requestDTO) {
+    public String updateCustomer(Long id, CustomerRequest requestDTO) {
 
         Customer customer = customerRepository.findForUpdate(id).orElseThrow();
         customer.setName(requestDTO.getName());
 
-            return ResponseEntity.ok("Customer with ID: " + id + " updated successfully");
+            return "Customer with ID: " + id + " updated successfully";
         // } else {
         //     return ResponseEntity.status(404).body("Customer not found with ID: " + id);
         // }   
@@ -158,7 +168,7 @@ public class CustomerService {
     public ResponseEntity<Map<String, Object>> deleteCustomer(Long id) {
         
         // 1. Create a mutable list from dummy data
-        List<CustomerDTO> customers = new ArrayList<>(getDummyCustomers());
+        List<CustomerRequest> customers = new ArrayList<>(getDummyCustomers());
 
         // 2. Remove the record using removeIf() instead of an unassigned stream filter
         boolean removed = customers.removeIf(c -> c.getId().equals(id));
@@ -175,9 +185,9 @@ public class CustomerService {
         return ResponseEntity.ok(response);
     }
 
-    private LoanDTO mapLoan(Loan loan) {
+    private LoanRequest mapLoan(Loan loan) {
 
-        LoanDTO dto = new LoanDTO();
+        LoanRequest dto = new LoanRequest();
 
         dto.setId(loan.getLoanId());
         dto.setAmount(loan.getAmount());
@@ -186,9 +196,9 @@ public class CustomerService {
         return dto;
     }
 
-    public List<LoanDTO> toList(Customer customer){
+    public List<LoanRequest> toList(Customer customer){
 
-        List<LoanDTO> loanResponses = customer.getLoans()
+        List<LoanRequest> loanResponses = customer.getLoans()
         .stream()
         .map(this::mapLoan)
         .toList();
