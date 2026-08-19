@@ -16,11 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.teresol.demo.dto.request.CustomerRequest;
+import com.teresol.demo.dto.response.CustomerResponse;
 import com.teresol.demo.dto.response.CustomerSummary;
 import com.teresol.demo.service.CustomerService;
 import com.teresol.demo.util.ApiResponse;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 
 
 @RestController
@@ -45,18 +47,18 @@ public class CustomerController {
     }    
     
     @GetMapping
-    public Page<CustomerRequest> getCustomers(
+    public Page<CustomerResponse> getCustomers(
         @RequestParam(defaultValue = "0") int page, 
-        @RequestParam(defaultValue = "10") int size, 
+        @RequestParam(defaultValue = "10") @Max(100) int size, 
         @RequestParam String sortBy) {
 
-        Page<CustomerRequest> customers = customerService.getAllCustomers(page, size, sortBy);
+        Page<CustomerResponse> customers = customerService.getAllCustomers(page, size, sortBy);
         
         return customers;
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<CustomerRequest>> getCustomersByID(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<CustomerResponse>> getCustomersByID(@PathVariable Long id) {
 
         return customerService.findCustomerById(id);
     }
