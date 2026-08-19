@@ -1,4 +1,4 @@
-package com.teresol.demo.dto;
+package com.teresol.demo.dto.response;
 
 import java.math.BigDecimal;
 
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoanDTO {
+public class LoanResponse {
 
     private Long id;
     private BigDecimal amount;

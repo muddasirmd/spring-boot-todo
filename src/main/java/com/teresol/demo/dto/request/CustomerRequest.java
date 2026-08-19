@@ -1,4 +1,4 @@
-package com.teresol.demo.dto;
+package com.teresol.demo.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
@@ -18,7 +18,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CustomerDTO {
+public class CustomerRequest {
 
     private Long id;
 
@@ -37,5 +37,5 @@ public class CustomerDTO {
     @Past(message = "Birth date must be in the past")
     private LocalDate dateOfBirth;
 
-    private List<LoanDTO> loans;
+    private List<LoanRequest> loans;
 }
