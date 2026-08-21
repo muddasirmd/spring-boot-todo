@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,8 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.teresol.demo.dto.request.CustomerRequest;
-import com.teresol.demo.dto.request.LoanRequest;
+// import com.teresol.demo.dto.request.LoanRequest;
+import com.teresol.demo.dto.response.CustomerResponse;
 import com.teresol.demo.dto.response.CustomerSummary;
+import com.teresol.demo.dto.response.LoanResponse;
 import com.teresol.demo.entity.Customer;
 import com.teresol.demo.entity.Loan;
 import com.teresol.demo.exception.DuplicateEmailException;
@@ -31,17 +34,19 @@ import com.teresol.demo.util.ApiResponse;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final CustomerMapper customerMapper;
 
-    public CustomerService(CustomerRepository customerRepository, CustomerMapper customerMapper) {
+    // @Autowired
+    // private CustomerMapper customerMapper;
+
+    public CustomerService(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
-        this.customerMapper = customerMapper;
+        // this.customerMapper = customerMapper;
     }
 
     
-    public List<CustomerRequest> getDummyCustomers() {
+    public List<CustomerResponse> getDummyCustomers() {
         return Arrays.asList(
-            CustomerRequest.builder()
+            CustomerResponse.builder()
                 .id(1L)
                 .name("Alice")
                 .age(20)
@@ -49,7 +54,7 @@ public class CustomerService {
                 .dateOfBirth(LocalDate.of(1990, 5, 14))
                 .build(),
 
-            CustomerRequest.builder()
+            CustomerResponse.builder()
                 .id(2L)
                 .name("Bob")
                 .age(25)
@@ -57,7 +62,7 @@ public class CustomerService {
                 .dateOfBirth(LocalDate.of(1985, 11, 22))
                 .build(),
 
-            CustomerRequest.builder()
+            CustomerResponse.builder()
                 .id(3L)
                 .name("Charlie")
                 .age(29)
@@ -74,7 +79,7 @@ public class CustomerService {
         return customers;
     }    
     
-    public Page<CustomerRequest> getAllCustomers(int page, int size, String sortBy) {
+    public List<CustomerResponse> getAllCustomers(int page, int size, String sortBy) {
 
         // List<Customer> customers = customerRepository.findAll();
         // List<Customer> customers = customerRepository.findByAgeLessThan(30);        
@@ -82,25 +87,26 @@ public class CustomerService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
 
-        // Page<Customer> customers = customerRepository.findAll(pageable);
+        Page<Customer> customers = customerRepository.findAll(pageable);
         
-        // List<CustomerDTO> customerDTOs = customers.stream()
-        //     .map(customer -> CustomerDTO.builder()
-        //         .id(customer.getCustomerId())
-        //         .name(customer.getName())
-        //         .email(customer.getEmail())
-        //         .age(customer.getAge())
-        //         .loans(toList(customer))
-        //         .build())
-        //     .toList();
+        
+        List<CustomerResponse> customerDTOs = customers.stream()
+            .map(customer -> CustomerResponse.builder()
+                .id(customer.getCustomerId())
+                .name(customer.getName())
+                .email(customer.getEmail())
+                .age(customer.getAge())
+                .loans(toList(customer))
+                .build())
+            .toList();
 
-        return customerRepository.findAll(pageable).map(customerMapper::toResponse);
+        // return customerRepository.findAll(pageable).map(customerMapper::toResponse);
 
-        // return customerDTOs;
+        return customerDTOs;
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<ApiResponse<CustomerRequest>> findCustomerById(Long id){
+    public ResponseEntity<ApiResponse<CustomerResponse>> findCustomerById(Long id){
 
 
         Customer customer = customerRepository.findById(id).orElse(null);
@@ -110,7 +116,7 @@ public class CustomerService {
 
         if(customer != null){
                 
-            CustomerRequest customerDTO = CustomerRequest.builder()
+            CustomerResponse customerDTO = CustomerResponse.builder()
                 .id(customer.getCustomerId())
                 .name(customer.getName())
                 .email(customer.getEmail())
@@ -125,6 +131,12 @@ public class CustomerService {
         }
         
     }
+
+    // public Page<CustomerResponse> search(String name, Pageable pageable) {
+
+    //     return customerRepository.findByNameContainingIgnoreCase(name, pageable)
+    //             .map(customerMapper::toResponse);
+    // }
 
 
     @Transactional
@@ -168,7 +180,7 @@ public class CustomerService {
     public ResponseEntity<Map<String, Object>> deleteCustomer(Long id) {
         
         // 1. Create a mutable list from dummy data
-        List<CustomerRequest> customers = new ArrayList<>(getDummyCustomers());
+        List<CustomerResponse> customers = new ArrayList<>(getDummyCustomers());
 
         // 2. Remove the record using removeIf() instead of an unassigned stream filter
         boolean removed = customers.removeIf(c -> c.getId().equals(id));
@@ -185,9 +197,9 @@ public class CustomerService {
         return ResponseEntity.ok(response);
     }
 
-    private LoanRequest mapLoan(Loan loan) {
+    private LoanResponse mapLoan(Loan loan) {
 
-        LoanRequest dto = new LoanRequest();
+        LoanResponse dto = new LoanResponse();
 
         dto.setId(loan.getLoanId());
         dto.setAmount(loan.getAmount());
@@ -196,9 +208,9 @@ public class CustomerService {
         return dto;
     }
 
-    public List<LoanRequest> toList(Customer customer){
+    public List<LoanResponse> toList(Customer customer){
 
-        List<LoanRequest> loanResponses = customer.getLoans()
+        List<LoanResponse> loanResponses = customer.getLoans()
         .stream()
         .map(this::mapLoan)
         .toList();
