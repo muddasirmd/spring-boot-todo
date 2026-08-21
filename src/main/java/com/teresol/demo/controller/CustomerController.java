@@ -47,12 +47,12 @@ public class CustomerController {
     }    
     
     @GetMapping
-    public Page<CustomerResponse> getCustomers(
+    public List<CustomerResponse> getCustomers(
         @RequestParam(defaultValue = "0") int page, 
         @RequestParam(defaultValue = "10") @Max(100) int size, 
         @RequestParam String sortBy) {
 
-        Page<CustomerResponse> customers = customerService.getAllCustomers(page, size, sortBy);
+        List<CustomerResponse> customers = customerService.getAllCustomers(page, size, sortBy);
         
         return customers;
     }
