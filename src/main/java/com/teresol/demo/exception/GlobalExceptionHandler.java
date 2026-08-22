@@ -15,21 +15,21 @@ import jakarta.servlet.http.HttpServletRequest;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleValidationException(
+    public ResponseEntity<ApiErrorResponse> handleValidationException(
             MethodArgumentNotValidException ex,
             HttpServletRequest request
     ) {
 
-        List<FieldError> errors = ex.getBindingResult()
+        List<FieldErrorResponse> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> new FieldError(
+                .map(error -> new FieldErrorResponse(
                         error.getField(),
                         error.getDefaultMessage()
                 ))
                 .toList();
 
-        ApiError response = new ApiError(
+        ApiErrorResponse response = new ApiErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 "Validation failed",
@@ -42,12 +42,12 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(CustomerNotFoundException.class)
-    public ResponseEntity<ApiError> handleCustomerNotFound(
+    public ResponseEntity<ApiErrorResponse> handleCustomerNotFound(
             CustomerNotFoundException ex,
             HttpServletRequest request
     ) {
 
-        ApiError error = new ApiError(
+        ApiErrorResponse error = new ApiErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
                 ex.getMessage(),
