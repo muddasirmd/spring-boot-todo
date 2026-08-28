@@ -9,4 +9,6 @@ import com.teresol.demo.entity.User;
 public interface UserRepository extends JpaRepository<User, Long>{
     
     Boolean existsByEmail(String email);
+
+    Boolean existsByUsername(String name);
 }
