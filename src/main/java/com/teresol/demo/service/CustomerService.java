@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.teresol.demo.dto.request.CustomerRequest;
-// import com.teresol.demo.dto.request.LoanRequest;
 import com.teresol.demo.dto.response.CustomerResponse;
 import com.teresol.demo.dto.response.CustomerSummary;
 import com.teresol.demo.dto.response.LoanResponse;
