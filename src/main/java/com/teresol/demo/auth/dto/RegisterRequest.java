@@ -1,4 +1,4 @@
-package com.teresol.demo.dto.request;
+package com.teresol.demo.auth.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,9 +11,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthRequest {
+public class RegisterRequest {
     
     @NotBlank
+    @Size(min = 3, max = 20)
     public String username;
     
     @NotBlank
@@ -21,7 +22,7 @@ public class AuthRequest {
     public String email;
     
     @NotBlank
-    @Size(min = 4, max = 8, message = "Password must be between 3 and 8 characters")
+    @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
     @Pattern(
         regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).*$",
         message = "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character"
