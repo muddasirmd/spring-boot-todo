@@ -1,4 +1,4 @@
-package com.teresol.demo.dto.response;
+package com.teresol.demo.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthResponse {
+public class RegisterResponse {
     
     public Long id;
     public String username;
