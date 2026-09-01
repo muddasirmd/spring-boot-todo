@@ -1,7 +1,11 @@
 package com.teresol.demo.entity;
 
+import com.teresol.demo.user.Role;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,8 +32,10 @@ public class User extends AuditableEntity {
     @Column(nullable =false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role;
+    private Role role;
 
-    private String enabled;
+    @Column(nullable = false)
+    private boolean enabled = true;
 }
