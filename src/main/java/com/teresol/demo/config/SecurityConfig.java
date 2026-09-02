@@ -30,8 +30,10 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()) // disable CSRF for stateless REST APIs (JWT-based, no cookies/sessions)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/public/**").permitAll()
-                .anyRequest().permitAll()
+                .requestMatchers( "/auth/register",
+                    "/auth/login",
+                    "/auth/refresh").permitAll()
+                .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // no session, since you'll use JWT

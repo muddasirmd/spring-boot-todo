@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.teresol.demo.auth.dto.AuthResponse;
-import com.teresol.demo.auth.dto.LoginRequest;
-import com.teresol.demo.auth.dto.RegisterRequest;
+import com.teresol.demo.auth.dto.request.LoginRequest;
+import com.teresol.demo.auth.dto.request.RegisterRequest;
+import com.teresol.demo.auth.dto.response.AuthResponse;
 
 import jakarta.validation.Valid;
 
