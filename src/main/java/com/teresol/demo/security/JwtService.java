@@ -78,6 +78,15 @@ public class JwtService {
         }
     }
 
+    public boolean isRefreshTokenValid(String token){
+        try{
+            extractAllClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e){
+            return false;
+        }
+    }
+
     private boolean isTokenExpired(String token) {
 
         return extractAllClaims(token)
