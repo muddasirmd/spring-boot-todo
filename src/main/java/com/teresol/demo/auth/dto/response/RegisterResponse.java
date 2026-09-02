@@ -1,4 +1,4 @@
-package com.teresol.demo.auth.dto;
+package com.teresol.demo.auth.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

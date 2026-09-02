@@ -1,4 +1,4 @@
-package com.teresol.demo.auth.dto;
+package com.teresol.demo.auth.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

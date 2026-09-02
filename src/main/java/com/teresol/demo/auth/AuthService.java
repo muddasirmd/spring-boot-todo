@@ -7,10 +7,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.teresol.demo.auth.dto.AuthResponse;
-import com.teresol.demo.auth.dto.LoginRequest;
-import com.teresol.demo.auth.dto.RegisterRequest;
-import com.teresol.demo.auth.dto.RegisterResponse;
+import com.teresol.demo.auth.dto.request.LoginRequest;
+import com.teresol.demo.auth.dto.request.RegisterRequest;
+import com.teresol.demo.auth.dto.response.AuthResponse;
+import com.teresol.demo.auth.dto.response.RegisterResponse;
 import com.teresol.demo.entity.User;
 import com.teresol.demo.exception.DuplicateEmailException;
 import com.teresol.demo.exception.DuplicateUsernameException;
