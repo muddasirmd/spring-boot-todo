@@ -26,7 +26,7 @@ import jakarta.validation.constraints.Max;
 
 
 @RestController
-@RequestMapping("/customers")
+@RequestMapping("/api/customers")
 public class CustomerController {
 
     // 1. Declare the service as a private final field

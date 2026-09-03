@@ -1,6 +1,7 @@
 package com.teresol.demo.auth;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -81,6 +82,26 @@ public class AuthService {
 
         return new AuthResponse(
             accessToken,
+            refreshToken,
+            "Bearer",
+            900
+        );
+    }
+
+    public AuthResponse refresh(String refreshToken){
+
+        if(!jwtService.isRefreshTokenValid(refreshToken)){
+            throw new BadCredentialsException("Invalid refresh token");
+        }
+
+        String username = jwtService.extractUsername(refreshToken);
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        String newAccessToken = jwtService.generateAccessToken(userDetails);
+
+        return new AuthResponse(
+            newAccessToken,
             refreshToken,
             "Bearer",
             900

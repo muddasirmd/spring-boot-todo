@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.teresol.demo.auth.dto.request.LoginRequest;
+import com.teresol.demo.auth.dto.request.RefreshTokenRequest;
 import com.teresol.demo.auth.dto.request.RegisterRequest;
 import com.teresol.demo.auth.dto.response.AuthResponse;
 
@@ -37,5 +38,11 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request){
 
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshTokenRequest request){
+
+        return ResponseEntity.ok(authService.refresh(request.refreshToken()));
     }
 }
