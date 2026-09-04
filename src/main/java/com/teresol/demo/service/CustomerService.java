@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -138,6 +139,7 @@ public class CustomerService {
     // }
 
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Transactional
     public String createCustomer(CustomerRequest requestDTO) {
         
@@ -163,6 +165,7 @@ public class CustomerService {
         
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Transactional
     public String updateCustomer(Long id, CustomerRequest requestDTO) {
 
@@ -176,6 +179,7 @@ public class CustomerService {
     }
 
     
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> deleteCustomer(Long id) {
         
         // 1. Create a mutable list from dummy data
