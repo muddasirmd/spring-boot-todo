@@ -1,8 +1,10 @@
 package com.teresol.demo.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,6 +29,22 @@ public class UserController {
 
         User user = userRepository.findByUsername(username).orElseThrow();
         // return ResponseEntity.ok(authentication.getPrincipal());
+
+        return ResponseEntity.ok(
+            new UserResponse(
+                user.getUserId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRole()
+            )
+        );
+    }
+
+    @PreAuthorize("@userAuthorization.canAccess(#userId, authentication)")
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUser(@PathVariable long userId){
+
+        User user = userRepository.findById(userId).orElseThrow();
 
         return ResponseEntity.ok(
             new UserResponse(
