@@ -41,7 +41,7 @@ public class UserController {
     }
 
     @PreAuthorize("@userAuthorization.canAccess(#userId, authentication)")
-    @GetMapping("/{id}")
+    @GetMapping("/{userId}")
     public ResponseEntity<UserResponse> getUser(@PathVariable long userId){
 
         User user = userRepository.findById(userId).orElseThrow();
