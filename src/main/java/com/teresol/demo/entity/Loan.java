@@ -23,7 +23,7 @@ import lombok.Setter;
 public class Loan extends AuditableEntity{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private Long loanId;
 
     @ManyToOne(fetch = FetchType.LAZY)
