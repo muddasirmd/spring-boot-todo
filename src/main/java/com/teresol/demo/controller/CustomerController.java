@@ -50,7 +50,7 @@ public class CustomerController {
     public List<CustomerResponse> getCustomers(
         @RequestParam(defaultValue = "0") int page, 
         @RequestParam(defaultValue = "10") @Max(100) int size, 
-        @RequestParam String sortBy) {
+        @RequestParam(defaultValue = "name") String sortBy) {
 
         List<CustomerResponse> customers = customerService.getAllCustomers(page, size, sortBy);
         
