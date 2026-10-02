@@ -1,5 +1,7 @@
 package com.teresol.demo.auth;
 
+import java.time.Instant;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,12 +14,18 @@ import com.teresol.demo.auth.dto.request.LoginRequest;
 import com.teresol.demo.auth.dto.request.RegisterRequest;
 import com.teresol.demo.auth.dto.response.AuthResponse;
 import com.teresol.demo.auth.dto.response.RegisterResponse;
+import com.teresol.demo.entity.RefreshToken;
 import com.teresol.demo.entity.User;
 import com.teresol.demo.exception.DuplicateEmailException;
 import com.teresol.demo.exception.DuplicateUsernameException;
+import com.teresol.demo.repository.RefreshTokenRepository;
 import com.teresol.demo.repository.UserRepository;
+import com.teresol.demo.security.CustomUserDetails;
 import com.teresol.demo.security.JwtService;
+import com.teresol.demo.security.RefreshTokenService;
 import com.teresol.demo.user.Role;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class AuthService {
@@ -27,19 +35,26 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public AuthService(
         UserRepository userRepository, 
         PasswordEncoder passwordEncoder,
         AuthenticationManager authenticationManager,
         UserDetailsService userDetailsService,
-        JwtService jwtService){
+        JwtService jwtService,
+        RefreshTokenService refreshTokenService,
+        RefreshTokenRepository refreshTokenRepository
+        ){
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
     
     public void register(RegisterRequest request){
@@ -88,21 +103,39 @@ public class AuthService {
         );
     }
 
+    @Transactional
     public AuthResponse refresh(String refreshToken){
 
-        if(!jwtService.isRefreshTokenValid(refreshToken)){
-            throw new BadCredentialsException("Invalid refresh token");
-        }
+        RefreshToken oldToken = refreshTokenService.validate(refreshToken);
 
-        String username = jwtService.extractUsername(refreshToken);
+        User user = oldToken.getUser();
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        oldToken.setRevokedAt(Instant.now());
+
+        String newRefreshToken = refreshTokenService.create(user);
+
+        // optionally set replacedBy here
+
+        UserDetails userDetails = new CustomUserDetails(user);
 
         String newAccessToken = jwtService.generateAccessToken(userDetails);
 
+        refreshTokenRepository.save(oldToken);
+
+
+        // if(!jwtService.isRefreshTokenValid(refreshToken)){
+        //     throw new BadCredentialsException("Invalid refresh token");
+        // }
+
+        // String username = jwtService.extractUsername(refreshToken);
+
+        // UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        // String newAccessToken = jwtService.generateAccessToken(userDetails);
+
         return new AuthResponse(
             newAccessToken,
-            refreshToken,
+            newRefreshToken,
             "Bearer",
             900
         );
