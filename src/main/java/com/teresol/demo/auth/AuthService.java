@@ -1,6 +1,7 @@
 package com.teresol.demo.auth;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -90,10 +91,12 @@ public class AuthService {
             new UsernamePasswordAuthenticationToken(request.username, request.password)
         );
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.username);
+        // UserDetails userDetails = userDetailsService.loadUserByUsername(request.username);
+        User user = userRepository.findByUsername(request.username).orElseThrow();
 
-        String accessToken = jwtService.generateAccessToken(userDetails);
-        String refreshToken = jwtService.generateRefreshToken(userDetails);
+        String accessToken = jwtService.generateAccessToken(user);
+        // String refreshToken = jwtService.generateRefreshToken(userDetails);
+        String refreshToken = refreshTokenService.create(user);
 
         return new AuthResponse(
             accessToken,
@@ -116,9 +119,10 @@ public class AuthService {
 
         // optionally set replacedBy here
 
-        UserDetails userDetails = new CustomUserDetails(user);
+        // UserDetails userDetails = new CustomUserDetails(user);
+        
 
-        String newAccessToken = jwtService.generateAccessToken(userDetails);
+        String newAccessToken = jwtService.generateAccessToken(user);
 
         refreshTokenRepository.save(oldToken);
 
@@ -139,5 +143,29 @@ public class AuthService {
             "Bearer",
             900
         );
+    }
+
+    // Logout current device
+    @Transactional 
+    public void logout(String rawToken){
+
+        RefreshToken refreshToken = refreshTokenService.validate(rawToken);
+
+        refreshToken.setRevokedAt(Instant.now());
+
+        refreshTokenRepository.save(refreshToken);
+    }
+
+    // Logout all devices
+    @Transactional
+    public void logoutAll(User user){
+
+        List<RefreshToken> tokens = refreshTokenRepository.findByUserAndRevokedAtIsNull(user);
+
+        Instant now = Instant.now();
+
+        tokens.forEach(token -> token.setRevokedAt(now));
+
+        refreshTokenRepository.saveAll(tokens);
     }
 }

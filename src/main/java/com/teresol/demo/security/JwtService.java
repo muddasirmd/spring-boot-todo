@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.teresol.demo.entity.User;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -17,44 +19,45 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtService {
 
+    private final JwtProperties jwtProperties;
+
     private final SecretKey secretKey;
     private final long accessTokenExpiration;
     private final long refreshTokenExpiration;
 
-    public JwtService(
-        @Value("${jwt.secret}") String secret,
-        @Value("${jwt.access-token-expiration}") long accessTokenExpiration,
-        @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration)
+    public JwtService(JwtProperties jwtProperties)
     {
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        this.accessTokenExpiration = accessTokenExpiration;
-        this.refreshTokenExpiration = refreshTokenExpiration;
+        this.jwtProperties = jwtProperties;
+
+        this.secretKey = Keys.hmacShaKeyFor(jwtProperties.secret().getBytes(StandardCharsets.UTF_8));
+        this.accessTokenExpiration = jwtProperties.accessTokenExpiration();
+        this.refreshTokenExpiration = jwtProperties.refreshTokenExpiration();
     }
     
-    public String generateAccessToken(UserDetails userDetails) {
+    public String generateAccessToken(User user) {
         
         return generateToken(
-                userDetails,
+                user,
                 accessTokenExpiration
         );
     }
 
-    public String generateRefreshToken(UserDetails userDetails) {
+    public String generateRefreshToken(User user) {
 
         return generateToken(
-                userDetails,
+                user,
                 refreshTokenExpiration
         );
     }
 
-    private String generateToken(UserDetails userDetails, long expiration) {
+    private String generateToken(User user, long expiration) {
 
         Date now = new Date();
 
         Date expiry = new Date(now.getTime() + expiration);
 
         return Jwts.builder()
-                .subject(userDetails.getUsername())
+                .subject(user.getUsername())
                 .issuedAt(now)
                 .expiration(expiry)
                 .signWith(secretKey)
