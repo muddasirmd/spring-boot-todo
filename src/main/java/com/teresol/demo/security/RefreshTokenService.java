@@ -72,9 +72,7 @@ public class RefreshTokenService {
         SecureRandom secureRandom = new SecureRandom();
         secureRandom.nextBytes(randomBytes);
 
-        return Base64.getUrlEncoder()
-                .withoutPadding()
-                .encodeToString(randomBytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
     }
 
     private String hashRefreshToken(String token) {
